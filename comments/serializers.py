@@ -26,6 +26,7 @@ class CommentSerializer(serializers.ModelSerializer):
             "owner",
             "created_at",
             "updated_at",
+            "post",
             "content",
         ]
 
