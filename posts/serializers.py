@@ -16,6 +16,11 @@ class PostSerializer(serializers.ModelSerializer):
             like = Like.objects.filter(
                 owner=user, post=obj
             ).first()
+            # Note to self: reason we use filter(...).first() and not get(...):
+            # get(...) will throw error if no like is found matching query
+            # so will [0] instead of .first()
+            # see Django docs: 
+            # https://docs.djangoproject.com/en/3.2/ref/models/querysets/#first
             return like.id if like else None
         return None
 
