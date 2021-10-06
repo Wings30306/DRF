@@ -9,6 +9,8 @@ class PostSerializer(serializers.ModelSerializer):
     profile_id = serializers.ReadOnlyField(source="owner.profile.id")
     profile_image = serializers.ReadOnlyField(source="owner.profile.image.url")
     like_id = serializers.SerializerMethodField()
+    likes_count = serializers.ReadOnlyField()
+    comments_count = serializers.ReadOnlyField()
 
     def get_like_id(self, obj):
         user = self.context['request'].user
@@ -19,7 +21,7 @@ class PostSerializer(serializers.ModelSerializer):
             # Note to self: reason we use filter(...).first() and not get(...):
             # get(...) will throw error if no like is found matching query
             # so will [0] instead of .first()
-            # see Django docs: 
+            # see Django docs:
             # https://docs.djangoproject.com/en/3.2/ref/models/querysets/#first
             return like.id if like else None
         return None
@@ -57,5 +59,7 @@ class PostSerializer(serializers.ModelSerializer):
             "content",
             "image",
             "image_filter",
-            "like_id"
+            "like_id",
+            "likes_count",
+            "comments_count"
         ]

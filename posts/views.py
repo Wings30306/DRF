@@ -1,6 +1,8 @@
 # from django.http import Http404 -- refactored
-from rest_framework import permissions, generics
+from django.db.models import Count
+from rest_framework import permissions, generics, filters
 # Line above refactored: status removed, generics added
+from django_filters.rest_framework import DjangoFilterBackend
 # from rest_framework.response import Response -- refactored
 # from rest_framework.views import APIView -- refactored
 from .models import Post
@@ -16,7 +18,30 @@ REFACTORED VIEWS USING GENERIC VIEWS
 class PostList(generics.ListCreateAPIView):
     serializer_class = PostSerializer
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
-    queryset = Post.objects.all()
+    queryset = Post.objects.annotate(
+        comments_count=Count('comment', distinct=True),
+        likes_count=Count('like', distinct=True)
+    ).order_by('-created_at')
+    filter_backends = [
+        filters.OrderingFilter,
+        filters.SearchFilter,
+        DjangoFilterBackend
+    ]
+    filterset_fields = [
+        'like__owner__profile',
+        'owner__profile',
+        'owner__followed__owner__profile'
+    ]
+    search_fields = [
+        'title',
+        'owner__username'
+    ]
+    ordering_fields = [
+        'comments_count',
+        'likes_count',
+        'like__created_at',
+        'comment__created_at'
+    ]
 
     def perform_create(self, serializer):
         serializer.save(owner=self.request.user)
@@ -25,7 +50,10 @@ class PostList(generics.ListCreateAPIView):
 class PostDetail(generics.RetrieveUpdateDestroyAPIView):
     permission_classes = [IsOwnerOrReadOnly]
     serializer_class = PostSerializer
-    queryset = Post.objects.all()
+    queryset = Post.objects.annotate(
+        comments_count=Count('comment', distinct=True),
+        likes_count=Count('like', distinct=True)
+    ).order_by('-created_at')
 
 
 """
