@@ -90,7 +90,7 @@ else:
 
 CORS_ALLOW_CREDENTIALS = True
 
-JWT_AUTH_SAMESITE = None
+JWT_AUTH_SAMESITE = "None"
 
 # Application definition
 
